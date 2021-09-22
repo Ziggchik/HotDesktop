@@ -1,0 +1,96 @@
+﻿@model HotDesktop.ViewModel.WorkplaceViewModel
+@{   
+ ViewBag.Title = "Index";
+}
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("btnSave").click(function () {
+            SaveWorkplaceData();
+        });
+    });
+    
+    function SaveWorkplaceData() {
+        var formData = new FormData;
+        formData.append("WorkplaceNumber", $("#txtWorkplaceNumber").val());
+        formData.append("BookingStatusId", $("#ddBookingStatus").val());
+        formData.append("WorkplaceDescription", $("#txtWorkplaceDescription").val());
+        formData.append("Image", $("#UploadImage").get(0).files[0]);
+
+        $.ajax({
+            async: true,
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            data: formData,
+            success: function (data) {
+                if (data.success === true) {
+                    alert(data.message);
+                    ResetWorkplaceInformation();
+                }
+            },
+            error: function () {
+                alert('Что-то пошло не так');
+            }
+        });
+    }
+
+    function ResetWorkplaceInformation() {
+        $("#txtWorkplaceNumber").val('');
+        $("#ddBookingStatus").val();
+        $("#txtWorkplaceDescription").val('');
+        $("#UploadImage").val('');
+        $("#txtWorkplaceNumber").focus();
+        $("#imgWorkplace").removeAttr('src');
+    }
+
+    function DisplayImage(result) {
+        if (result.files && result.files[0]) {
+            var fileReader = new FileReader();
+            fileReader.onload = function (e) {
+                $("#imgWorkplace").attr('src', e.target.result);
+            }
+            fileReader.readAsDataURL(result.files[0]);
+        }
+    }
+</script>
+
+<div>
+    <button type="button" class="adding-workplace" data-toggle="modal" data-target="#divAddWorkplace" data-backdrop="static" data-keyboard="false">Добавить рабочее место</button>
+</div>
+
+<div id="divAddWorkplace" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Место</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.WorkplaceNumber)
+                        @Html.TextBoxFor(model => model.WorkplaceNumber, new { @class = "form-control", id="txtWorkplaceNumber" })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.BookingStatusId)
+                        @Html.DropDownListFor(model => model.BookingStatusId, Model.ListOfBookingStatus, new { @class = "form-control", id = "ddBookingStatus" })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.WorkplaceDescription)
+                        @Html.TextBoxFor(model => model.WorkplaceDescription, new { @class = "form-control", id = "txtWorkplaceDescription" })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.WorkplaceImage)
+                        <input id="UploadImage" type="file" class="form-control" name="WorkplaceImage" title="Загрузить изображение" onchange="DisplayImage(this)">
+                        <img id="imgWorkplace" height="200" width="200" style="border:solid" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnSave" type="button" class="btn-save">Сохранить</button>&nbsp;
+                <button type="button" data-dismiss="modal" class="btn-close">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
